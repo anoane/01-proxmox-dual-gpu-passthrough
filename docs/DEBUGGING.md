@@ -1,3 +1,10 @@
+> **Third-party document — not written here.** This is cmpunlocker's own debugging FAQ, taken from
+> [amoghmunikote/cmpunlocker](https://github.com/amoghmunikote/cmpunlocker) at commit `76f0954`
+> and kept alongside this recipe for convenience. It remains under that project's licence (see
+> `cmpunlocker-reference/LICENSE`). Any Discord or support channel it mentions belongs to **that** project; please do not direct cmpunlocker questions here.
+
+---
+
 # Debugging
 
 Before you go asking in the Discord for help, here is a FAQ you should take a look at:

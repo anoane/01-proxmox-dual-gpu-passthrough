@@ -18,7 +18,7 @@ marked superseded.
 | CPU | AMD Ryzen 9 9950X3D (16C/32T) — 24 vCPU passed to the guest |
 | RAM | 160 GiB DDR5 allocated to the guest (157 GiB usable) — **no swap, deliberately** |
 | GPU 0 | NVIDIA RTX PRO 6000 Blackwell Workstation — 97,887 MiB, `sm_120`, `10de:2bb1`, PCIe Gen5 x16 (~42 GB/s H2D measured), 400 W default limit / 600 W max |
-| GPU 1 | NVIDIA CMP 170HX — 65,536 MiB **after unlock** (8 GB stock), `sm_80` (GA100), `10de:20c2`, 200 W default limit / 250 W max. The unlocked card does **Gen2 x16** (tested in the x16 slot); in *this* build it occupies a PCIe 3.0 **x1** slot, so the link runs **Gen2 x1, ~0.38 GB/s** — see repo 01 §5 |
+| GPU 1 | NVIDIA CMP 170HX — 65,536 MiB after the [cmpunlocker](https://github.com/amoghmunikote/cmpunlocker) unlock (8 GB stock), `sm_80` (GA100), `10de:20c2`, 200 W default limit / 250 W max. The unlocked card does **Gen2 x16** (tested in the x16 slot); in *this* build it occupies a PCIe 3.0 **x1** slot, so the link runs **Gen2 x1, ~0.38 GB/s** — see repo 01 §5 |
 | Guest | Ubuntu 24.04.4 LTS, kernel 6.8.0-139-generic, NVIDIA driver 610.43.02 |
 | Storage | 5.8 TB NVMe (~93 GB free with all packs resident) |
 
@@ -268,6 +268,31 @@ qm start <VMID>
 | CMP stuck at **Gen1** | retrain never ran or ran too late | `gen2.service` before `basic.target`; check `/var/log/gen2.log` |
 | host driver grabs a card | blacklist incomplete | `host/modprobe.d/blacklist-gpu-host.conf`, then `update-initramfs -u` |
 | card disappears after idle | D3 transition | `options vfio-pci disable_idle_d3=1` |
+
+---
+
+## Credits
+
+**The CMP 170HX unlock is not my work.** It is
+[cmpunlocker](https://github.com/amoghmunikote/cmpunlocker), pinned here at commit `76f0954`,
+and every CMP-related thing in this repo depends on it:
+
+- the patched `open-gpu-kernel-modules` build that makes the card report 64 GB (`install.sh`)
+- `cmp_no_bus_reset.ko` — without it the vfio bind resets the card and erases the unlock
+- `tools/passthrough.sh restore` — the only thing that clears a latched `bsi_secure_scratch_14`
+- `tools/gsp-restore.py` — this repo's hookscript *wraps* it rather than reimplementing it
+
+The capacitor mod that gives the card its full PCIe width is documented by the same author in
+[170th-Street](https://github.com/amoghmunikote/170th-Street)
+(`modifications/pcie-capacitor-mod.md`).
+
+Third-party content kept here, under cmpunlocker's own licence and credited in
+`cmpunlocker-reference/NOTICE.md`: the `cmpunlocker-reference/` excerpt, plus
+`docs/INSTALLATION.md` and `docs/DEBUGGING.md`.
+
+What is original here is the **Proxmox side**: the VM definition, the pre-start GSP-restore
+hookscript (and the reasoning for why a udev rule is not enough), `gen2-hammer` + `gen2.service`,
+the IOMMU grouping work, and getting both cards passed through to one guest at once.
 
 ---
 

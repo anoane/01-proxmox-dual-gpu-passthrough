@@ -1,3 +1,10 @@
+> **Third-party document — not written here.** This is cmpunlocker's own installation guide, taken from
+> [amoghmunikote/cmpunlocker](https://github.com/amoghmunikote/cmpunlocker) at commit `76f0954`
+> and kept alongside this recipe for convenience. It remains under that project's licence (see
+> `cmpunlocker-reference/LICENSE`). The commands below are run **inside a cmpunlocker checkout on the Proxmox host**, not in this repo.
+
+---
+
 # Installation
 
 Here are the steps to install cmpunlocker on your system.
