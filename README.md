@@ -18,7 +18,7 @@ marked superseded.
 | CPU | AMD Ryzen 9 9950X3D (16C/32T) — 24 vCPU passed to the guest |
 | RAM | 160 GiB DDR5 allocated to the guest (157 GiB usable) — **no swap, deliberately** |
 | GPU 0 | NVIDIA RTX PRO 6000 Blackwell Workstation — 97,887 MiB, `sm_120`, `10de:2bb1`, PCIe Gen5 x16 (~42 GB/s H2D measured), 400 W default limit / 600 W max |
-| GPU 1 | NVIDIA CMP 170HX — 65,536 MiB **after unlock** (8 GB stock), `sm_80` (GA100), `10de:20c2`, PCIe **Gen2 x1 (~0.38 GB/s)**, 200 W default limit / 250 W max |
+| GPU 1 | NVIDIA CMP 170HX — 65,536 MiB **after unlock** (8 GB stock), `sm_80` (GA100), `10de:20c2`, 200 W default limit / 250 W max. The unlocked card does **Gen2 x16** (tested in the x16 slot); in *this* build it occupies a PCIe 3.0 **x1** slot, so the link runs **Gen2 x1, ~0.38 GB/s** — see repo 01 §5 |
 | Guest | Ubuntu 24.04.4 LTS, kernel 6.8.0-139-generic, NVIDIA driver 610.43.02 |
 | Storage | 5.8 TB NVMe (~93 GB free with all packs resident) |
 
@@ -190,8 +190,29 @@ trained before anything claims it.
 ```
 
 Both look alarming and both are **idle downtraining**. Measured under real traffic this host
-sustains ~42 GB/s H2D on the Blackwell. The CMP genuinely is x1 — about 0.38 GB/s — which is
-the single most important number if you plan to put a model on it.
+sustains ~42 GB/s H2D on the Blackwell.
+
+### x1 is the slot, not the card
+
+The unlock gives the CMP a full **Gen2 x16** link, and that was **tested and confirmed** with the
+card sitting in this board's PCIe 5.0 x16 slot. The CMP is *not* an x1 device — a x1 link is
+purely a consequence of where it ends up in this particular build.
+
+The constraint is the motherboard, which has only one x16 slot to give:
+
+| slot | electrical | holds | why |
+|---|---|---|---|
+| 1 | PCIe 5.0 x16 | RTX PRO 6000 | the card that actually needs the bandwidth |
+| 2 | PCIe 3.0 **x1** | CMP 170HX | what is left |
+| 3 | PCIe 4.0 x4 | 10 GbE NIC | the NIC needs x4; it cannot go in slot 2 |
+
+Slot 1 is spoken for by the Blackwell and slot 3 by the 10 GbE port, so the CMP lands in the
+x1 slot. It still trains to Gen2 there — that is what the hammer is for — giving **Gen2 x1**,
+about 0.38 GB/s measured. On a board with a second x16 slot the same unlocked card would run
+Gen2 x16 (~8 GB/s theoretical), roughly 20x this link.
+
+So **0.38 GB/s is the number that matters for planning here**, but treat it as a property of
+this chassis, not of the CMP 170HX.
 
 > **Design consequence.** At x1, sending *weights* to the CMP is hopeless, but sending
 > *activations* is nearly free (~10 KiB per token per layer). Any workload split across these
