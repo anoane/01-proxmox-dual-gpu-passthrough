@@ -1,0 +1,24 @@
+# never commit credentials or captured state
+*.key
+*.pem
+id_*
+*_rsa
+*_ed25519
+*.conf.local
+.env
+.env.*
+credentials/
+
+# model weights and captured tensors
+*.safetensors
+*.gguf
+*.bin
+*.npz
+*.rom
+
+# logs and scratch (results/ and patches/ are evidence - kept deliberately)
+/*.log
+/*.log.*
+__pycache__/
+*.pyc
+.build/

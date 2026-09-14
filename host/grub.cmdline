@@ -1,0 +1,2 @@
+GRUB_CMDLINE_LINUX_DEFAULT="quiet amd_iommu=on iommu=pt"
+GRUB_CMDLINE_LINUX=""
